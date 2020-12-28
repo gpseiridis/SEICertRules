@@ -66,3 +66,32 @@ void compliantExample3()
     }
 }
 }  // namespace CTR52CPP
+
+/*CTR55-CPP.
+ * Do not use an additive operator on an iterator if the result would overflow*/
+namespace CTR55CPP
+{
+void nonCompliantExample1(const std::vector<int>& srcVector)
+{
+    std::cout << "in this example a random access iterator from a std::vector is used in an additive expression, but "
+                 "the resulting value could be outside the bounds of the container"
+                 " rather than a past-the-end value \n";
+    for (auto i = srcVector.begin(), e = i + 20; i != e; ++i)
+    {
+        std::cout << *i << std::endl;
+    }
+}
+
+void compliantExample1(const std::vector<int>& srcVector)
+{
+    std::cout << "in this compliant alternative we instead restrict to a number of maximum "
+                 "items that could pe processed. \n";
+    const std::vector<int>::size_type maxSize = 20;
+    for (auto i = srcVector.begin(), e = i + std::min(maxSize, srcVector.size()); i != e; ++i)
+    {
+        // ...
+        std::cout << "for iterator = "<< *i << " current element = " << srcVector[*i] << "\n";
+    }
+}
+
+}// namespace CTR55CPP

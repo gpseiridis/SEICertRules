@@ -15,6 +15,9 @@ int main()
     CTR52CPP::compliantExample3();
     CTR55CPP::compliantExample1(myVector);
 
+    /*Rule 05. Characters and Strings (STR) */
+
+
 
 
 

@@ -1,5 +1,8 @@
 #include "CPPRules/Containers.h"
 #include "CPPRules/Declerations.h"
+#include "CPPRules/Strings.h"
+#include "CPPRules/MemoryManagement.h"
+
 #include <iostream>
 #include <vector>
 
@@ -16,6 +19,14 @@ int main()
     CTR55CPP::compliantExample1(myVector);
 
     /*Rule 05. Characters and Strings (STR) */
+
+    /*Rule 06. Memory Management (MEM) */
+    MEM50CPP::nonCompliantExample1(42, "hello");
+    MEM50CPP::nonCompliantExample2(20, "hello people");
+
+    MEM50CPP::compliantExample1(42, "hello");
+    MEM50CPP::compliantExample2(42, "hello people");
+
 
 
 

@@ -189,3 +189,125 @@ void compliantExample4()
 }
 
 }  // namespace MEM51CPP
+
+/*MEM52-CPP. Detect and handle memory allocation errors */
+namespace MEM52CPP
+{
+// T *p1 = new T; // Throws std::bad_alloc if allocation fails
+// T *p2 = new (std::nothrow) T; // Returns nullptr if allocation fails
+//
+// T *p3 = new T[1]; // Throws std::bad_alloc if the allocation fails
+// T *p4 = new (std::nothrow) T[1]; // Returns nullptr if the allocation fails
+
+void nonCompliantExample1(const int* array, std::size_t size) noexcept
+{
+    /*In this noncompliant code example,
+     * an array of int is created using ::operator new[](std::size_t)
+     * and the results of the allocation are not checked.
+     * The function is marked as noexcept,
+     * so the caller assumes this function does not throw any exceptions.
+     * Because ::operator new[](std::size_t) can throw an exception if the allocation fails,
+     * it could lead to abnormal termination of the program. */
+    int* copy = new int[size];
+    std::memcpy(copy, array, size * sizeof(*copy));
+    // ...
+    delete[] copy;
+}
+
+void compliantExample1(const int* array, std::size_t size) noexcept
+{
+    /* Compliant Solution (std::nothrow)
+     * When using std::nothrow,
+     * the new operator returns either a null pointer or a pointer to the allocated space.
+     * Always test the returned pointer to ensure it is not nullptr before referencing the pointer.
+     * This compliant solution handles the error condition appropriately when the returned pointer is nullptr. */
+    int* copy = new (std::nothrow) int[size];
+    if (not copy)
+    {
+        // Handle error
+        return;
+    }
+    std::memcpy(copy, array, size * sizeof(*copy));
+    // ...
+    delete[] copy;
+}
+
+void compliantExample2(const int* array, std::size_t size) noexcept
+{
+    /* Compliant Solution (std::bad_alloc)
+     * Alternatively, you can use ::operator new[] without std::nothrow
+     * and instead catch a std::bad_alloc exception if sufficient memory cannot be allocated. */
+    int* copy;
+    try
+    {
+        copy = new int[size];
+    }
+    catch (std::bad_alloc)
+    {
+        // Handle error
+        return;
+    }
+    // At this point, copy has been initialized to allocated memory
+    std::memcpy(copy, array, size * sizeof(*copy));
+    // ...
+    delete[] copy;
+}
+
+void compliantExample3(const int* array, std::size_t size) noexcept(false)
+{
+    /* Compliant Solution (noexcept(false))
+     * If the design of the function is such that the caller is expected to handle exceptional situations,
+     * it is permissible to mark the function explicitly as one that may throw, as in this compliant solution.
+     * Marking the function is not strictly required,
+     * as any function without a noexcept specifier is presumed to allow throwing. */
+
+    int* copy = new int[size];
+    // If the allocation fails, it will throw an exception which the caller
+    // will have to handle.
+    std::memcpy(copy, array, size * sizeof(*copy));
+    // ...
+    delete[] copy;
+}
+
+// Non compliant example 2
+/* In this noncompliant code example,
+ * two memory allocations are performed within the same expression.
+ * Because the memory allocations are passed as arguments to a function call,
+ * an exception thrown as a result of one of the calls to new could result in a memory leak. */
+struct A
+{ /* ... */
+};
+struct B
+{ /* ... */
+};
+
+void g(A*, B*);
+void nonCompliantExample2()
+{
+    //  If A allocated first then B throws exception
+    //  Wrapping the call to g() in a try/catch block is insufficient because
+    //  it would be impossible to free the memory allocated for A.
+    g(new A, new B);
+}
+
+void compliantExample4()
+{
+    /*use unique_ptr
+     * If A is allocated but B throws exception,
+     * it would still result in the destruction and deallocation of the A object
+     * when then std::unique_ptr<A> was destroyed*/
+    
+    //g(std::make_unique<A>(), std::make_unique<B>());  C++14
+}
+
+void compliantExample5()
+{
+    /* Alternatively use References
+     * When possible, the more resilient compliant solution is to remove the memory allocation entirely
+     * and pass the objects by reference instead */
+    A a;
+    B b;
+    g(a, b);
+}
+
+}  // namespace MEM52CPP

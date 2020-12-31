@@ -296,8 +296,8 @@ void compliantExample4()
      * If A is allocated but B throws exception,
      * it would still result in the destruction and deallocation of the A object
      * when then std::unique_ptr<A> was destroyed*/
-    
-    //g(std::make_unique<A>(), std::make_unique<B>());  C++14
+
+    // g(std::make_unique<A>(), std::make_unique<B>());  C++14
 }
 
 void compliantExample5()
@@ -311,3 +311,41 @@ void compliantExample5()
 }
 
 }  // namespace MEM52CPP
+
+/*MEM56-CPP. Do not store an already-owned pointer value in an unrelated smart pointer */
+namespace MEM56CPP
+{
+void nonCompliantExample1()
+{
+    /* In this non-compliant code example,
+     * two unrelated smart pointers are constructed from the same underlying pointer value.
+     * When the local, automatic variable p2 is destroyed,
+     * it deletes the pointer value it manages.
+     * Then, when the local, automatic variable p1 is destroyed, it deletes the same pointer value,
+     * resulting in a double-free vulnerability. */
+
+    // summary: p2 is destroyed releases i*. p1 destroyed releases same *i which was already released!
+    int* i = new int;
+    std::shared_ptr<int> p1(i);
+    std::shared_ptr<int> p2(i);
+}
+
+void compliantExample1()
+{
+    /* In this compliant solution,
+     * the std::shared_ptr objects are related to one another through copy construction.
+     * When the local, automatic variable p2 is destroyed,
+     * the use count for the shared pointer value is decremented but still nonzero.
+     *
+     * Then, when the local, automatic variable p1 is destroyed,
+     * the use count for the shared pointer value is decremented to zero,
+     * and the managed pointer is destroyed.
+     * This compliant solution also calls std::make_shared() instead of allocating a raw pointer
+     * and storing its value in a local variable.
+
+ */
+    std::shared_ptr<int> p1 = std::make_shared<int>();
+    std::shared_ptr<int> p2(p1);
+}
+
+}  // namespace MEM56CPP

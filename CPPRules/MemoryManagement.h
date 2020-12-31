@@ -6,7 +6,7 @@
 namespace MEM50CPP
 {
 /*Omitted example is when trying to use ptr after delete */
-
+/*Remember when the pointer is not pointing then we might have serious issues */
 void nonCompliantExample1(int inputNumber, const char* inputStr)
 {
     const char* someStr = "";

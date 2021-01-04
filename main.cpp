@@ -36,7 +36,6 @@ int main()
 
     /*********** C RULES  ***********/
     /*Rule 08. Memory Management (MEM) */
-    MEM30C::Node myNode{};
-    MEM30C::compliantExample1(&myNode);
+
 
 }

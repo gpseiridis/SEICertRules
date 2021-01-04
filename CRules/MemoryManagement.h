@@ -35,12 +35,10 @@ void compliantExample1(struct Node* head)
 
 void nonCompliantExample2(char* c_str1, size_t size)
 {
-    std::cout << "size of input str= " << sizeof(c_str1) << "\n";
-
     /* realloc() may free c_str1 when it returns a null pointer,
      * resulting in c_str1 being freed twice */
-    /* if parameter size = 0 then realloc will be the equivalent of free() */
-    //@todo dokimase to
+    /* if parameter size = 0 then realloc will be the equivalent of free()
+     * double-free vulnerability [Seacord 2013b] */
     char* c_str2 = (char*)realloc(c_str1, size);
     if (c_str2 == NULL)
     {
